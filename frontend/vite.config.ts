@@ -11,15 +11,12 @@ if (!BACKEND_HOST.match(/^([\w\d-]+(\.[\w\d-]+)+(:\d+)?)/)) {
   );
 }
 
-console.log("process.env.FRONTEND_HOST", process.env.FRONTEND_HOST);
-
 export default defineConfig({
   // depending on your application, base can also be "/"
   base: "",
   plugins: [react(), viteTsconfigPaths()],
   clearScreen: false,
   server: {
-    host: true,
     port: process.env.FRONTEND_PORT
       ? Number.parseInt(process.env.FRONTEND_PORT, 10)
       : 3001,
