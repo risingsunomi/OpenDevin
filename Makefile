@@ -5,6 +5,7 @@ DOCKER_IMAGE = ghcr.io/opendevin/sandbox
 BACKEND_PORT = 3000
 BACKEND_HOST = "127.0.0.1:$(BACKEND_PORT)"
 FRONTEND_PORT = 3001
+FRONTEND_HOST = "0.0.0.0"
 DEFAULT_WORKSPACE_DIR = "./workspace"
 DEFAULT_MODEL = "gpt-3.5-turbo-1106"
 CONFIG_FILE = config.toml
@@ -27,11 +28,26 @@ build:
 	@$(MAKE) -s install-precommit-hooks
 	@echo "$(GREEN)Build completed successfully.$(RESET)"
 
+build-nodocker:
+	@echo "$(GREEN)Building project...$(RESET)"
+	@$(MAKE) -s check-dependencies-nodocker
+	@$(MAKE) -s install-python-dependencies
+	@$(MAKE) -s install-frontend-dependencies
+	@$(MAKE) -s install-precommit-hooks
+	@echo "$(GREEN)Build completed successfully.$(RESET)"
+
 check-dependencies:
 	@echo "$(YELLOW)Checking dependencies...$(RESET)"
 	@$(MAKE) -s check-python
 	@$(MAKE) -s check-npm
 	@$(MAKE) -s check-docker
+	@$(MAKE) -s check-poetry
+	@echo "$(GREEN)Dependencies checked successfully.$(RESET)"
+
+check-dependencies-nodocker:
+	@echo "$(YELLOW)Checking dependencies...$(RESET)"
+	@$(MAKE) -s check-python
+	@$(MAKE) -s check-npm
 	@$(MAKE) -s check-poetry
 	@echo "$(GREEN)Dependencies checked successfully.$(RESET)"
 
@@ -113,7 +129,7 @@ start-backend:
 # Start frontend
 start-frontend:
 	@echo "$(YELLOW)Starting frontend...$(RESET)"
-	@cd frontend && BACKEND_HOST=$(BACKEND_HOST) FRONTEND_PORT=$(FRONTEND_PORT) npm run start
+	@cd frontend && BACKEND_HOST=$(BACKEND_HOST) FRONTEND_HOST=$(FRONTEND_HOST) FRONTEND_PORT=$(FRONTEND_PORT) npm run start
 
 # Run the app
 run:
@@ -128,7 +144,7 @@ run:
 	@echo "$(YELLOW)Waiting for the backend to start...$(RESET)"
 	@until nc -z localhost $(BACKEND_PORT); do sleep 0.1; done
 	@echo "$(GREEN)Backend started successfully.$(RESET)"
-	@cd frontend && echo "$(BLUE)Starting frontend with npm...$(RESET)" && npm run start -- --port $(FRONTEND_PORT)
+	@cd frontend && echo "$(BLUE)Starting frontend with npm...$(RESET)" && npm run start -- --port $(FRONTEND_PORT) --host $(FRONTEND_HOST)
 	@echo "$(GREEN)Application started successfully.$(RESET)"
 
 # Setup config.toml
