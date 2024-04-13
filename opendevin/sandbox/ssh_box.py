@@ -129,7 +129,7 @@ class DockerSSHBox(Sandbox):
         # Create the opendevin user
         exit_code, logs = self.container.exec_run(
             ['/bin/bash', '-c',
-             f'useradd -rm -d /home/opendevin -s /bin/bash -g root -G sudo -u -o {USER_ID} opendevin'],
+             f'useradd -rm -d /home/opendevin -o -s /bin/bash -g root -G sudo -u {USER_ID} opendevin'],
             workdir='/workspace',
         )
         if exit_code != 0:
