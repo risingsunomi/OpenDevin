@@ -291,20 +291,21 @@ class DockerSSHBox(Sandbox):
                 os.path.isfile('/proc/self/cgroup') and any('docker' in line for line in open('/proc/self/cgroup'))
             )
 
-            if platform.system() == 'Linux':
-                network_kwargs['network_mode'] = 'host'
-            elif platform.system() == 'Darwin':
-                # FIXME: This is a temporary workaround for Mac OS
-                network_kwargs['ports'] = {'2222/tcp': self._ssh_port}
-                logger.warning(
-                    ('Using port forwarding for Mac OS. '
-                     'Server started by OpenDevin will not be accessible from the host machine at the moment. '
-                     'See https://github.com/OpenDevin/OpenDevin/issues/897 for more information.'
-                     )
-                )
-            elif on_docker:
+            if on_docker:
                 network_kwargs['ports'] = {'2222/tcp': self._ssh_port}
                 logger.warning('Using port forwarding for Docker.')
+            else:
+                if platform.system() == 'Linux':
+                    network_kwargs['network_mode'] = 'host'
+                elif platform.system() == 'Darwin':
+                    # FIXME: This is a temporary workaround for Mac OS
+                    network_kwargs['ports'] = {'2222/tcp': self._ssh_port}
+                    logger.warning(
+                        ('Using port forwarding for Mac OS. '
+                        'Server started by OpenDevin will not be accessible from the host machine at the moment. '
+                        'See https://github.com/OpenDevin/OpenDevin/issues/897 for more information.'
+                        )
+                    )
 
             # start the container
             self.container = self.docker_client.containers.run(
