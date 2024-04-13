@@ -284,6 +284,13 @@ class DockerSSHBox(Sandbox):
 
         try:
             network_kwargs: Dict[str, Union[str, Dict[str, int]]] = {}
+
+            # check platform for network configuration
+            on_docker = (
+                os.path.exists('/.dockerenv') or
+                os.path.isfile('/proc/self/cgroup') and any('docker' in line for line in open('/proc/self/cgroup'))
+            )
+
             if platform.system() == 'Linux':
                 network_kwargs['network_mode'] = 'host'
             elif platform.system() == 'Darwin':
@@ -295,6 +302,9 @@ class DockerSSHBox(Sandbox):
                      'See https://github.com/OpenDevin/OpenDevin/issues/897 for more information.'
                      )
                 )
+            elif on_docker:
+                network_kwargs['ports'] = {'2222/tcp': self._ssh_port}
+                logger.warning('Using port forwarding for Docker.')
 
             # start the container
             self.container = self.docker_client.containers.run(
