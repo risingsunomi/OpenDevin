@@ -305,6 +305,7 @@ class DockerSSHBox(Sandbox):
                 working_dir='/workspace',
                 name=self.container_name,
                 hostname='opendevin_sandbox',
+                ports={"2222": 2222},
                 detach=True,
                 volumes={self.workspace_dir: {
                     'bind': '/workspace', 'mode': 'rw'}},
